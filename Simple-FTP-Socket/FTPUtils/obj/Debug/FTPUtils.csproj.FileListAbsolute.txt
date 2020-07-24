@@ -1,0 +1,7 @@
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\obj\Debug\FTPUtils.csprojAssemblyReference.cache
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\obj\Debug\FTPUtils.csproj.CoreCompileInputs.cache
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\bin\Debug\FTPUtils.exe.config
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\bin\Debug\FTPUtils.exe
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\bin\Debug\FTPUtils.pdb
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\obj\Debug\FTPUtils.exe
+B:\计算机网络实验\计网实验大作业\My-FTP-Application\FTPUtils\obj\Debug\FTPUtils.pdb
