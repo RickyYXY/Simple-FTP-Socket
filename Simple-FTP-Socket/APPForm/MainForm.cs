@@ -152,34 +152,49 @@ namespace APPForm
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            if (ftpClient != null)
-                ftpClient.Close();
             try
             {
-                if (CheckUserInfo())
+                if(btnLogin.Text=="点击连接")
                 {
-                    string ipAddr = this.toolStripTextBoxIpAddr.Text.Trim();
-                    string port = this.toolStripTextBoxPort.Text.Trim();
-                    string userName = this.toolStripTextBoxName.Text.Trim();
-                    string password = this.toolStripTextBoxPassword.Text.Trim();
-                    ftpClient = new FTPClient(ipAddr, port, userName, password);                    
-                    if (!ftpClient.Connect())
+                    if (CheckUserInfo())
                     {
-                        lblMsg.Text = "连接失败";
-                    }
-                    else
-                    {
-                        if (ftpClient.Login())
-                        {
-                            lblMsg.Text = "登录成功";
-                        }
+                        string ipAddr = this.toolStripTextBoxIpAddr.Text.Trim();
+                        string port = this.toolStripTextBoxPort.Text.Trim();
+                        string userName = this.toolStripTextBoxName.Text.Trim();
+                        string password = this.toolStripTextBoxPassword.Text.Trim();
+                        ftpClient = new FTPClient(ipAddr, port, userName, password);
+                        if (!ftpClient.Connect())
+                            lblMsg.Text = "连接失败，请检查服务器状况";
                         else
                         {
-                            lblMsg.Text = "用户名/密码出错";
-                            ftpClient.Close();
+                            if (ftpClient.Login())
+                            {
+                                lblMsg.Text = "登录成功";
+                                btnLogin.Text = "断开连接";
+                                toolStripTextBoxIpAddr.ReadOnly = true;
+                                toolStripTextBoxName.ReadOnly = true;
+                                toolStripTextBoxPassword.ReadOnly = true;
+                                toolStripTextBoxPort.ReadOnly = true;
+                                ShowFilesDirectory();
+                            }
+                            else
+                            {
+                                lblMsg.Text = "用户名/密码出错";
+                                ftpClient.Close();
+                            }
                         }
                     }
-                    ShowFilesDirectory();
+                }
+                else
+                {
+                    ftpClient.Close();
+                    FTPflowLayoutPanel.Controls.Clear();
+                    btnLogin.Text = "点击连接";
+                    toolStripTextBoxIpAddr.ReadOnly = false;
+                    toolStripTextBoxName.ReadOnly = false;
+                    toolStripTextBoxPassword.ReadOnly = false;
+                    toolStripTextBoxPort.ReadOnly = false;
+                    lblMsg.Text = "";
                 }
             }
             catch (Exception ex)
@@ -272,7 +287,6 @@ namespace APPForm
             }
         }
 
-        #region FTP功能部分
         /// <summary>
         /// 在对应板块展示服务器端文件的内容
         /// </summary>
@@ -280,60 +294,48 @@ namespace APPForm
         {
             try
             {
-                bool isOk = false;
-                string[] arrAccept = ftpClient.GetFilesDirectory(out isOk);//调用Ftp目录显示功能
-                if (isOk)
+                string[] arrAccept = ftpClient.GetFilesList();//调用Ftp目录显示功能
+                FTPflowLayoutPanel.Controls.Clear();
+                foreach (string accept in arrAccept)
                 {
-                    FTPflowLayoutPanel.Controls.Clear();
-                    foreach (string accept in arrAccept)
+                    if (accept == "")
+                        continue;
+                    string name = accept.Substring(39);
+                    //创建一个临时控件用于显示ftp服务器端的文件
+                    Button btnTmp = new Button()
                     {
-                        string name = accept.Substring(39);
+                        BackColor = Color.White,
+                        TextImageRelation = TextImageRelation.ImageAboveText,
+                        Text = name,
+                        Width = 80,
+                        Height = 80
+                    };
+                    btnTmp.AutoSize = true;
+                    btnTmp.FlatAppearance.BorderSize = 0;
+                    btnTmp.FlatStyle = FlatStyle.Flat;
 
-                        //创建一个临时控件用于显示ftp服务器端的文件
-                        Button btnTmp = new Button()
-                        {
-                            BackColor = Color.White,
-                            TextImageRelation = TextImageRelation.ImageAboveText,
-                            Text = name,
-                            Width = 80,
-                            Height = 80
-                        };
-
-                        btnTmp.AutoSize = true;
-                        btnTmp.FlatAppearance.BorderSize = 0;
-                        btnTmp.FlatStyle = FlatStyle.Flat;
-
-                        if (accept.IndexOf("<DIR>") != -1)       //如果是文件夹
-                        {
-                            btnTmp.Image = Properties.Resources.folder.ToBitmap();
-                            btnTmp.Tag = FtpContentType.folder;
-                        }
-                        else          //如果是文件
-                        {
-                            btnTmp.Image = Properties.Resources.file.ToBitmap();
-                            btnTmp.Tag = FtpContentType.file;
-                            btnTmp.ContextMenuStrip = menuRightKey; //只有文件右键才有按钮出现
-                            btnTmp.MouseDown += new MouseEventHandler(BtnTmp_MouseDown);
-                        }
-
-                        //btnTmp.DoubleClick += new EventHandler(btnTmp_DoubleClick);
-                        btnTmp.Click += new EventHandler(btnTmp_Click);//Button中不支持双击事件，所以用单击事件模拟双击
-                        FTPflowLayoutPanel.Controls.Add(btnTmp);
+                    if (accept.IndexOf("<DIR>") != -1)       //如果是文件夹
+                    {
+                        btnTmp.Image = Properties.Resources.folder.ToBitmap();
+                        btnTmp.Tag = FtpContentType.folder;
                     }
-                    lblMsg.Text = "服务器端文件载入成功";
+                    else          //如果是文件
+                    {
+                        btnTmp.Image = Properties.Resources.file.ToBitmap();
+                        btnTmp.Tag = FtpContentType.file;
+                        btnTmp.ContextMenuStrip = menuRightKey; //只有文件右键才有按钮出现
+                        btnTmp.MouseDown += new MouseEventHandler(BtnTmp_MouseDown);
+                    }
+                    btnTmp.Click += new EventHandler(btnTmp_Click);//Button中不支持双击事件，所以用单击事件模拟双击
+                    FTPflowLayoutPanel.Controls.Add(btnTmp);
                 }
-                else
-                {
-                    ftpClient.SetPrePath();
-                    lblMsg.Text = "链接失败，或者没有数据";
-                }
+                lblMsg.Text = "服务器端文件载入成功";
             }
             catch(Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
         }
-        #endregion
 
         //返回上级文件夹
         private void toolStripButtonReturn_Click(object sender, EventArgs e)
@@ -362,18 +364,15 @@ namespace APPForm
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
             string name = menuItem.Tag.ToString();
             ftpClient.RelatePath = string.Format("{0}/{1}",ftpClient.RelatePath, name);
-            bool isOk = false;
-            ftpClient.DeleteFile(out isOk);
+            ftpClient.DeleteFile(out bool isOK);
             ftpClient.SetPrePath();
-            if (isOk)
+            if (isOK)
             {
                 ShowFilesDirectory();
                 lblMsg.Text = "删除成功";
             }
             else
-            {
                 lblMsg.Text = "删除失败";
-            }
         }
 
         /// <summary>
@@ -440,12 +439,6 @@ namespace APPForm
                 return;
             }
             toolStripProgressBar1.Value = (int)((double)progress / total * 100);
-        }
-
-        private void toolStripButtonDisconnect_Click(object sender, EventArgs e)
-        {
-            ftpClient.Close();
-            FTPflowLayoutPanel.Controls.Clear();
         }
     }
 }

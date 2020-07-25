@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace FTPUtils
 {
@@ -25,7 +26,8 @@ namespace FTPUtils
         public string UserName { get; set; }
         public string Password { get; set; }
 
-        private Socket socket;
+        private Socket cmdSocket;
+        private Socket dataSocket;
         private const int BUFFER_SIZE = 4096;
 
         public FTPClient() { }
@@ -35,6 +37,18 @@ namespace FTPUtils
             Port = port;
             UserName = userName;
             Password = password;
+            RelatePath = "";
+        }
+
+        /// <summary>
+        /// 接收控制socket收到的应答信息
+        /// </summary>
+        /// <returns></returns>
+        private string CmdSocketReceive()
+        {
+            byte[] bytes = new byte[BUFFER_SIZE];
+            int size = cmdSocket.Receive(bytes, bytes.Length, 0);
+            return Encoding.UTF8.GetString(bytes, 0, size);
         }
 
         /// <summary>
@@ -45,11 +59,18 @@ namespace FTPUtils
         /// <returns></returns>
         public bool Connect()
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            cmdSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
-                socket.Connect(new IPEndPoint(IPAddress.Parse(IpAddr), int.Parse(Port)));               
-                return true;
+                cmdSocket.Connect(new IPEndPoint(IPAddress.Parse(IpAddr), int.Parse(Port)));
+                /*var localEndPoint = ((IPEndPoint)cmdSocket.LocalEndPoint);
+                dataSocket.Bind(new IPEndPoint(IPAddress.Parse(localEndPoint.Address.ToString()), 
+                    localEndPoint.Port + 1)); //与客户端绑定？？*/
+                string response = CmdSocketReceive();
+                if (response.StartsWith("220"))
+                    return true;
+                return false;
             }
             catch (Exception)
             {
@@ -65,15 +86,18 @@ namespace FTPUtils
         /// <param name="Password"></param>
         /// <returns></returns>
         public bool Login()
-        {
-            socket.Send(Encoding.UTF8.GetBytes(UserName + "??" + Password));
-            byte[] bytes = new byte[BUFFER_SIZE];
-            int size = socket.Receive(bytes, bytes.Length, 0);
-            string response = Encoding.UTF8.GetString(bytes, 0, size);
-            if (response.Equals("LOGIN_SUCCESS"))
-                return true;
-            else
-                return false;
+        {            
+            cmdSocket.Send(Encoding.UTF8.GetBytes("USER " + UserName + "\r\n"));
+            string response = CmdSocketReceive();
+
+            if (response.StartsWith("331")) //331  用户名正常，需要密码
+            {
+                cmdSocket.Send(Encoding.UTF8.GetBytes("PASS " + Password + "\r\n"));
+                response = CmdSocketReceive();
+                if (response.StartsWith("230")) //230  用户已登录，请继续
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -81,44 +105,90 @@ namespace FTPUtils
         /// </summary>
         public void Close()
         {
-            if (socket == null)
-                return;
             try
             {
-                socket.Send(Encoding.UTF8.GetBytes("{\"action\":\"quit\"}"));
+                cmdSocket.Send(Encoding.UTF8.GetBytes("QUIT" + "\r\n"));
+                CmdSocketReceive();
             }
             catch (Exception)
             {
                 throw;
             }
-            socket.Close();
+            cmdSocket.Close();
+            dataSocket.Close();
+        }
+
+        /// <summary>
+        /// 进入被动模式
+        /// </summary>
+        /// <returns></returns>
+        private bool EnterPassiveMode()
+        {
+            // 启用 Binary Mode
+            cmdSocket.Send(Encoding.UTF8.GetBytes("TYPE I" + "\r\n"));
+            string response = CmdSocketReceive();
+            if (!response.StartsWith("200")) //200  命令成功
+                return false;
+            // 进入被动模式
+            cmdSocket.Send(Encoding.UTF8.GetBytes("PASV" + "\r\n"));
+            response = CmdSocketReceive();
+            if (response.StartsWith("227")) //227 进入被动模式
+            {
+                int server_data_port;   // Unspecified
+                                             // 解析被动模式下服务器数据端口，比如：(127,0,0,1,74,93)
+                                             // 端口即为74*256+93
+                int le = response.LastIndexOf("(");
+                int re = response.LastIndexOf(")");
+                response = response.Substring(le + 1, re - le - 1);
+                string[] da = response.Split(',');
+                server_data_port = int.Parse(da[da.Length - 2]) * 256 + int.Parse(da[da.Length - 1]);
+                dataSocket.ConnectAsync(new IPEndPoint(IPAddress.Parse(IpAddr), server_data_port)).Wait();
+                return true;
+            }    
+            return false;
         }
 
         /// <summary>
         /// 获取当前路径下服务器端的文件信息
         /// </summary>
         /// <returns></returns>
-        public string[] Dir()
+        public string[] GetFilesList()
         {
-            socket.Send(Encoding.UTF8.GetBytes("{\"action\":\"dir\"}"));
-            byte[] bytes = new byte[BUFFER_SIZE];
-            int size = socket.Receive(bytes, bytes.Length, 0);
-            string response = Encoding.UTF8.GetString(bytes, 0, size);
-            string[] names = response.Split('\n');
-            return names;
-        }
+            if (!EnterPassiveMode())
+                throw new Exception("无法接收数据！");
+            dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
+            cmdSocket.Send(Encoding.UTF8.GetBytes("LIST " + RelatePath + "\r\n"));
+            string response = CmdSocketReceive();
+            while (!response.Contains("226"))
+                response = CmdSocketReceive();
 
-        /// <summary>
-        /// 获取服务器端的文件信息
-        /// </summary>
-        /// <param name="isOk"></param>
-        /// <returns></returns>
-        public string[] GetFilesDirectory(out bool isOk)
-        {
-            string method = WebRequestMethods.Ftp.ListDirectoryDetails;
-            var statusCode = FtpStatusCode.DataAlreadyOpen;
-            FtpWebResponse response = CallFTP(method);
-            return ReadByLine(response, statusCode, out isOk);
+            MemoryStream ms = new MemoryStream();
+            byte[] buf = new byte[1 * 1024 * 1024];
+            int length = 0;
+            while (dataSocket.Available > 0 || (length >= 1 && buf[length - 1] != '\n'))
+            {
+                length = dataSocket.Receive(buf);
+                // Connected 只反映上一个 Receive/Send 操作时的 Socket 状态
+                if (dataSocket.Connected == false) throw new Exception("远程主机断开连接");
+                ms.Write(buf, 0, length);
+            }
+            // 发送FIN
+            dataSocket.Shutdown(SocketShutdown.Send);
+            // 接收所有剩余的数据，直到Receive返回0，表明对方已发送FIN
+            while (true)
+            {
+                length = dataSocket.Receive(buf);
+                if (length == 0) break;
+                ms.Write(buf, 0, length);
+            }
+            dataSocket.Disconnect(true);
+
+            //将得到的文件信息分成一行一行，以\r\n分割
+            string rawInfo = Encoding.UTF8.GetString(ms.ToArray());
+            if (rawInfo.LastIndexOf("\r\n") == rawInfo.Length - 2)
+                rawInfo = rawInfo.Remove(rawInfo.Length - 2, 2);
+            string[] filesInfo = Regex.Split(rawInfo, @"\r\n");
+            return filesInfo;
         }
 
         /// <summary>
@@ -128,13 +198,9 @@ namespace FTPUtils
         {
             string relatePath = RelatePath;
             if (string.IsNullOrEmpty(relatePath) || relatePath.LastIndexOf("/") == 0)
-            {
                 relatePath = "";
-            }
             else
-            {
                 relatePath = relatePath.Substring(0, relatePath.LastIndexOf("/"));
-            }
             RelatePath = relatePath;
         }
 
@@ -153,73 +219,15 @@ namespace FTPUtils
         /// <param name="isOK"></param>
         public void DeleteFile(out bool isOK)
         {
-            string method = WebRequestMethods.Ftp.DeleteFile;
-            var statusCode = FtpStatusCode.FileActionOK;
-            FtpWebResponse response = CallFTP(method);
-            if (statusCode == response.StatusCode)
+            cmdSocket.Send(Encoding.UTF8.GetBytes("DELE " + RelatePath + "\r\n"));
+            string response = CmdSocketReceive();
+            if (response.StartsWith("250"))
                 isOK = true;
             else
                 isOK = false;
-            response.Close();
         }
 
-        /// <summary>
-        /// 请求FTP服务
-        /// </summary>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private FtpWebResponse CallFTP(string method)
-        {
-            //设置uri
-            string uri = string.Format("ftp://{0}:{1}{2}", IpAddr, Port, RelatePath);
-            //创建请求
-            FtpWebRequest request;
-            request = (FtpWebRequest)FtpWebRequest.Create(uri);
-            //设置请求参数
-            request.UseBinary = true;
-            request.UsePassive = true;
-            request.Credentials = new NetworkCredential(UserName, Password);
-            request.KeepAlive = false;
-            request.Method = method;
-            //等待回复
-            FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-            return response;
-        }
-
-        /// <summary>
-        /// 按行读取
-        /// </summary>
-        /// <param name="response"></param>
-        /// <param name="statusCode"></param>
-        /// <param name="isOk"></param>
-        /// <returns></returns>
-        private string[] ReadByLine(FtpWebResponse response, FtpStatusCode statusCode, out bool isOk)
-        {
-            List<string> lstAccpet = new List<string>();
-            int clock = 0;
-            isOk = false;
-            while (clock <= 5)
-            {
-                if (response.StatusCode == statusCode)
-                {
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                    {
-                        string line = sr.ReadLine();
-                        while (!string.IsNullOrEmpty(line))
-                        {
-                            lstAccpet.Add(line);
-                            line = sr.ReadLine();
-                        }
-                    }
-                    isOk = true;
-                    break;
-                }
-                clock++;
-                Thread.Sleep(200);
-            }
-            response.Close();
-            return lstAccpet.ToArray();
-        }
+/**************************************************************************************************/
 
         public void Download(string filepath, long size, Action<int,int> updateProgress)
         {

@@ -12,3 +12,17 @@ B:\计算机网络实验\计网实验大作业\My-FTP-Application\APPForm\bin\De
 B:\计算机网络实验\计网实验大作业\My-FTP-Application\APPForm\bin\Debug\FTPUtils.pdb
 B:\计算机网络实验\计网实验大作业\My-FTP-Application\APPForm\bin\Debug\FTPUtils.exe.config
 B:\计算机网络实验\计网实验大作业\My-FTP-Application\APPForm\obj\Debug\APPForm.csproj.CopyComplete
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\bin\Debug\APPForm.exe.config
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\bin\Debug\APPForm.exe
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\bin\Debug\APPForm.pdb
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\bin\Debug\FTPUtils.exe
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\bin\Debug\FTPUtils.pdb
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\bin\Debug\FTPUtils.exe.config
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csprojAssemblyReference.cache
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.MainForm.resources
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.Properties.Resources.resources
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.GenerateResource.cache
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.CoreCompileInputs.cache
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.CopyComplete
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.exe
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.pdb
