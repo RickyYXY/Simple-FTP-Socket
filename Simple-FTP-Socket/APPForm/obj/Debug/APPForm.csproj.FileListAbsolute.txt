@@ -26,3 +26,17 @@ B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\De
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.CopyComplete
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.exe
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.pdb
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\bin\Debug\APPForm.exe.config
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\bin\Debug\APPForm.exe
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\bin\Debug\APPForm.pdb
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\bin\Debug\FTPUtils.exe
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\bin\Debug\FTPUtils.pdb
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\bin\Debug\FTPUtils.exe.config
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csprojAssemblyReference.cache
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.MainForm.resources
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.Properties.Resources.resources
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.GenerateResource.cache
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.CoreCompileInputs.cache
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.csproj.CopyComplete
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.exe
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\APPForm\obj\Debug\APPForm.pdb

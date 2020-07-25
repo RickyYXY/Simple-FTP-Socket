@@ -12,3 +12,10 @@ B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\D
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.exe
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.pdb
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.csprojAssemblyReference.cache
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\bin\Debug\FTPUtils.exe.config
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\bin\Debug\FTPUtils.exe
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\bin\Debug\FTPUtils.pdb
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.csprojAssemblyReference.cache
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.csproj.CoreCompileInputs.cache
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.exe
+D:\大学\大二下\计算机网络\实验\Simple-FTP-Socket\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.pdb

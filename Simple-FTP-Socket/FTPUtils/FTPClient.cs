@@ -61,12 +61,14 @@ namespace FTPUtils
         {
             cmdSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            dataSocket.ReceiveTimeout = 0;
+            dataSocket.SendTimeout = 0;
             try
             {
                 cmdSocket.Connect(new IPEndPoint(IPAddress.Parse(IpAddr), int.Parse(Port)));
-                /*var localEndPoint = ((IPEndPoint)cmdSocket.LocalEndPoint);
-                dataSocket.Bind(new IPEndPoint(IPAddress.Parse(localEndPoint.Address.ToString()), 
-                    localEndPoint.Port + 1)); //与客户端绑定？？*/
+                var localEndPoint = ((IPEndPoint)cmdSocket.LocalEndPoint);
+                dataSocket.Bind(new IPEndPoint(IPAddress.Parse(localEndPoint.Address.ToString()),
+                    localEndPoint.Port + 1)); //与客户端绑定？？
                 string response = CmdSocketReceive();
                 if (response.StartsWith("220"))
                     return true;
@@ -86,7 +88,7 @@ namespace FTPUtils
         /// <param name="Password"></param>
         /// <returns></returns>
         public bool Login()
-        {            
+        {
             cmdSocket.Send(Encoding.UTF8.GetBytes("USER " + UserName + "\r\n"));
             string response = CmdSocketReceive();
 
@@ -135,8 +137,8 @@ namespace FTPUtils
             if (response.StartsWith("227")) //227 进入被动模式
             {
                 int server_data_port;   // Unspecified
-                                             // 解析被动模式下服务器数据端口，比如：(127,0,0,1,74,93)
-                                             // 端口即为74*256+93
+                                        // 解析被动模式下服务器数据端口，比如：(127,0,0,1,74,93)
+                                        // 端口即为74*256+93
                 int le = response.LastIndexOf("(");
                 int re = response.LastIndexOf(")");
                 response = response.Substring(le + 1, re - le - 1);
@@ -144,7 +146,7 @@ namespace FTPUtils
                 server_data_port = int.Parse(da[da.Length - 2]) * 256 + int.Parse(da[da.Length - 1]);
                 dataSocket.ConnectAsync(new IPEndPoint(IPAddress.Parse(IpAddr), server_data_port)).Wait();
                 return true;
-            }    
+            }
             return false;
         }
 
@@ -227,167 +229,150 @@ namespace FTPUtils
                 isOK = false;
         }
 
-/**************************************************************************************************/
+        /**************************************************************************************************/
 
-        public void Download(string filepath, long size, Action<int,int> updateProgress)
+
+
+        public void Download(string filepath, long size, Action<int, int> updateProgress)
         {
-            FtpWebRequest reqFTP, ftpsize;
-            Stream ftpStream = null;
-            FtpWebResponse response = null;
-            FileStream outputStream = null;
-            try
+            long totalDownloadedByte = size;
+            var totalBytes = GetFileSize();
+            if (totalBytes == -1) throw new Exception("无法获取远程文件的文件大小，或该远程文件已经不存在");
+            cmdSocket.Send(Encoding.UTF8.GetBytes("CWD " + RelatePath + "\r\n"));
+            string response = CmdSocketReceive();
+            EnterPassiveMode();
+            cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + size + "\r\n"));
+            response = CmdSocketReceive();
+            if (!response.StartsWith("300") && !response.StartsWith("350"))
             {
-                outputStream = new FileStream(filepath, FileMode.Append);
-                Uri uri = new Uri(string.Format("ftp://{0}:{1}{2}", IpAddr, Port, RelatePath));
-                ftpsize = (FtpWebRequest)FtpWebRequest.Create(uri);
-                ftpsize.UseBinary = true;
-                ftpsize.ContentOffset = size;
+                throw new Exception("响应错误");
+            }
+            cmdSocket.Send(Encoding.UTF8.GetBytes("RETR " + RelatePath + "\r\n"));
+            response = CmdSocketReceive();
+            if (!response.StartsWith("125") && !response.StartsWith("150"))
+            {
+                throw new Exception("响应错误");
+            }
+            using (FileStream outputStream = new FileStream(filepath, FileMode.Append))
+            {
 
-                reqFTP = (FtpWebRequest)FtpWebRequest.Create(uri);
-                reqFTP.UseBinary = true;
-                reqFTP.KeepAlive = false;
-                reqFTP.ContentOffset = size;
-                ftpsize.Credentials = new NetworkCredential(UserName, Password);
-                reqFTP.Credentials = new NetworkCredential(UserName, Password);
-                ftpsize.Method = WebRequestMethods.Ftp.GetFileSize;
-                FtpWebResponse re = (FtpWebResponse)ftpsize.GetResponse();
-                long totalBytes = re.ContentLength;
-                re.Close();
+                dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
 
-                reqFTP.Method = WebRequestMethods.Ftp.DownloadFile;
-                response = (FtpWebResponse)reqFTP.GetResponse();
-                ftpStream = response.GetResponseStream();
-                long totalDownloadedByte = size;
+                byte[] buffer = new byte[1 * 1024 * 1024];
+                int readCount = dataSocket.Receive(buffer);
                 updateProgress((int)totalBytes, (int)totalDownloadedByte);
-                int bufferSize = 2048;
-                int readCount;
-                byte[] buffer = new byte[bufferSize];
-                readCount = ftpStream.Read(buffer, 0, bufferSize);
                 while (readCount > 0)
                 {
                     totalDownloadedByte += readCount;
                     outputStream.Write(buffer, 0, readCount);
                     updateProgress((int)totalBytes, (int)totalDownloadedByte);
-                    readCount = ftpStream.Read(buffer, 0, bufferSize);
+                    readCount = dataSocket.Receive(buffer);
                 }
-                ftpStream.Close();
-                outputStream.Close();
-                response.Close();
-
-                //File.Delete(filepath.Substring(0, filepath.Length - 5));
-                //FileInfo fileInfo = new FileInfo(filepath);
-                //fileInfo.MoveTo(filepath.Substring(0, filepath.Length - 5));
-
             }
-            catch (Exception)
+            response = CmdSocketReceive();
+            if (response.StartsWith("226"))
             {
-                throw;
+                dataSocket.Shutdown(SocketShutdown.Send);
+                dataSocket.Disconnect(true);
             }
-            finally
+            else
             {
-                if (ftpStream != null)
-                {
-                    ftpStream.Close();
-                }
-                if (outputStream != null)
-                {
-                    outputStream.Close();
-                }
-                if (response != null)
-                {
-                    response.Close();
-                }
-                SetPrePath();
+                throw new Exception("响应错误");
             }
+
         }
 
         public void Upload(string localPath, Action<int, int> updateProgress)
         {
             FileInfo fileInf = new FileInfo(localPath);
             long allbye = fileInf.Length;
+            var size = GetFileSize();
+            if (size != -1)
+            {
+                throw new Exception("远程文件已存在");
+            }
+            RelatePath += ".temp";
             long startfilesize = GetFileSize();
-
-            long startbye = startfilesize;
+            long startbye = startfilesize <= 0 ? 0 : startfilesize;
             updateProgress((int)allbye, (int)startfilesize);//更新进度条   
 
-            string uri = string.Format("ftp://{0}:{1}{2}", this.IpAddr, this.Port, this.RelatePath + ".temp");
 
-            FtpWebRequest request;
-            request = (FtpWebRequest)FtpWebRequest.Create(new Uri(uri));
-            request.Credentials = new NetworkCredential(UserName, Password);
-            request.KeepAlive = false;
-            request.Method = WebRequestMethods.Ftp.AppendFile;
-            request.UseBinary = true;
-            request.ContentLength = fileInf.Length;
-            request.Timeout = 10 * 1000;
-            int buffLength = 2048; 
-            byte[] buff = new byte[buffLength];
-            FileStream fs = fileInf.OpenRead();
-            Stream strm = null;
-            try
+            string response;
+            cmdSocket.Send(Encoding.UTF8.GetBytes("CWD " + RelatePath + "\r\n"));
+            response = CmdSocketReceive();
+            EnterPassiveMode();
+            if (startbye > 0)
             {
-                strm = request.GetRequestStream();
-                fs.Seek(startfilesize, 0);
-                int contentLen = fs.Read(buff, 0, buffLength);
+                cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + startbye + "\r\n"));
+                response = CmdSocketReceive();
+                if (!response.StartsWith("300") && !response.StartsWith("350"))
+                {
+                    throw new Exception("响应错误");
+                }
+            }
+            else
+            {
+                cmdSocket.Send(Encoding.UTF8.GetBytes("ALLO " + allbye + "\r\n"));
+                response = CmdSocketReceive();
+            }
+
+
+            cmdSocket.Send(Encoding.UTF8.GetBytes("STOR " + RelatePath + "\r\n"));
+            response = CmdSocketReceive();
+            if (!response.StartsWith("125") && !response.StartsWith("150"))
+            {
+                throw new Exception("响应错误");
+            }
+
+            using (FileStream fs = fileInf.OpenRead())
+            {
+                int buffLength = 1 * 1024 * 1024;
+                byte[] buffer = new byte[buffLength];
+                dataSocket.SendBufferSize = buffLength;
+                fs.Seek(startbye, 0);
+                int contentLen = fs.Read(buffer, 0, buffLength);
                 while (contentLen != 0)
                 {
-                    strm.Write(buff, 0, contentLen);
-                    contentLen = fs.Read(buff, 0, buffLength);
+                    dataSocket.Send(buffer, 0, contentLen, SocketFlags.None);
+                    contentLen = fs.Read(buffer, 0, buffLength);
                     startbye += contentLen;
                     updateProgress((int)allbye, (int)startbye);
-                    
-                }
-                strm.Close();
-                fs.Close();
-                Rename(fileInf.Name);
-                SetPrePath();
-            }
-            catch
-            {
-                throw;
-            }
-            finally
-            {
-                if (fs != null)
-                {
-                    fs.Close();
-                }
-                if (strm != null)
-                {
-                    strm.Close();
+
                 }
             }
+            dataSocket.Shutdown(SocketShutdown.Send);
+            dataSocket.Disconnect(true);
+
         }
 
         private long GetFileSize()
         {
             try
             {
-                FtpWebRequest reqFTP;
-                //FileInfo fi = new FileInfo(filename);
-                //string uri;
-                //if (remoteFilepath.Length == 0)
-                //{
-                //    uri = "ftp://" + FtpServerIP + "/" + fi.Name;
-                //}
-                //else
-                //{
-                //    uri = "ftp://" + FtpServerIP + "/" + remoteFilepath + "/" + fi.Name;
-                //}
-                Uri uri = new Uri(string.Format("ftp://{0}:{1}{2}", IpAddr, Port, RelatePath) + ".temp");
-                reqFTP = (FtpWebRequest)FtpWebRequest.Create(uri);
-                reqFTP.KeepAlive = false;
-                reqFTP.UseBinary = true;
-                reqFTP.Credentials = new NetworkCredential(UserName, Password);
-                reqFTP.Method = WebRequestMethods.Ftp.GetFileSize;
-                FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
-                long filesize = response.ContentLength;
-                return filesize;
+                cmdSocket.Send(Encoding.UTF8.GetBytes("SIZE " + RelatePath + "\r\n"));
+                var response = CmdSocketReceive();
+                if (response.StartsWith("213"))
+                {
+                    return long.Parse(response.Substring(4, response.Length - 4));
+                }
+                return -1;
             }
             catch
             {
-                return 0;
+                return -1;
             }
+        }
+
+
+        public string GetFileLastModifiedTime()
+        {
+            cmdSocket.Send(Encoding.UTF8.GetBytes("MDTM " + RelatePath + "\r\n"));
+            var response = CmdSocketReceive();
+            if (response.StartsWith("213"))
+            {
+                return response.Substring(4, response.Length - 4); // 去掉响应码
+            }
+            return null;
         }
 
         private void Rename(string filename)
@@ -410,17 +395,6 @@ namespace FTPUtils
             {
                 throw;
             }
-            //finally
-            //{
-            //    if (ftpResponseStream != null)
-            //    {
-            //        ftpResponseStream.Close();
-            //    }
-            //    if (ftpWebResponse != null)
-            //    {
-            //        ftpWebResponse.Close();
-            //    }
-            //}
         }
     }
 }

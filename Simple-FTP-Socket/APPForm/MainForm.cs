@@ -120,13 +120,14 @@ namespace APPForm
         /// <param name="e"></param>
         private void menuLoad_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (ftpClient == null)
+            if (ftpClient == null)
                 {
                     MessageBox.Show("请先登录！");
                     return;
                 }
+            try
+            {
+                
                 ToolStripMenuItem mi = (ToolStripMenuItem)sender;
                 string path = mi.Tag.ToString();
                 if (File.Exists(path))
@@ -137,9 +138,15 @@ namespace APPForm
                     lblMsg.Text = "上传成功";
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                MessageBox.Show(ex.Message);
                 lblMsg.Text = "上传失败";
+            }
+            finally
+            {
+
+                ftpClient.SetPrePath();
             }
         }
 
@@ -385,6 +392,7 @@ namespace APPForm
         {
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
             string name = menuItem.Tag.ToString();
+            lblMsg.Text = "开始下载";
             SaveFileDialog sfd = new SaveFileDialog()
             {
                 FileName = name,
@@ -407,29 +415,26 @@ namespace APPForm
                             size = outputStream.Length;
                         }
                     }
-                    //Thread threadDownload = new Thread(() => ftpClient.Download(filePath, size,updateProgress));
-                    //threadDownload.Start();
-                    //Thread threadWait = new Thread(() =>
-                    //{
-                    //    threadDownload.Join();
-                    //    MessageBox.Show("下载完成");
-                    //});
-                    //threadWait.Start();
                     ftpClient.Download(filePath, size, updateProgress);
-                    //MessageBox.Show("下载完成");
 
                     File.Delete(filePath.Substring(0, filePath.Length - 5));
                     FileInfo fileInfo = new FileInfo(filePath);
                     fileInfo.MoveTo(filePath.Substring(0, filePath.Length - 5));
 
-                    lblMsg.Text = "下载完成";
+                    lblMsg.Text = "下载成功";
+                    MessageBox.Show("下载完成");
                 }
                 catch(Exception ex)
                 {
                     MessageBox.Show(ex.Message);
                     lblMsg.Text = "下载失败";
                 }
+                finally
+                {
+                    ftpClient.SetPrePath();
+                }
             }
+            lblMsg.Text = "";
         }
 
         private void updateProgress(int total, int progress)
