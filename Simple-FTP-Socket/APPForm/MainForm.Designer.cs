@@ -33,6 +33,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStripInfo = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripTextBoxIpAddr = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripLabel4 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripTextBoxPort = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -62,7 +63,6 @@
             this.menuRightKey = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuSaveAs = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDelete = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripTextBoxIpAddr = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripInfo.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -103,6 +103,13 @@
             this.toolStripLabel1.Size = new System.Drawing.Size(54, 29);
             this.toolStripLabel1.Text = "主机：";
             // 
+            // toolStripTextBoxIpAddr
+            // 
+            this.toolStripTextBoxIpAddr.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.toolStripTextBoxIpAddr.Name = "toolStripTextBoxIpAddr";
+            this.toolStripTextBoxIpAddr.Size = new System.Drawing.Size(132, 32);
+            this.toolStripTextBoxIpAddr.Text = "192.168.0.102";
+            // 
             // toolStripLabel4
             // 
             this.toolStripLabel4.Name = "toolStripLabel4";
@@ -111,6 +118,7 @@
             // 
             // toolStripTextBoxPort
             // 
+            this.toolStripTextBoxPort.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxPort.Name = "toolStripTextBoxPort";
             this.toolStripTextBoxPort.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxPort.Text = "21";
@@ -128,6 +136,7 @@
             // 
             // toolStripTextBoxName
             // 
+            this.toolStripTextBoxName.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxName.Name = "toolStripTextBoxName";
             this.toolStripTextBoxName.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxName.Text = "yxy";
@@ -146,6 +155,7 @@
             // 
             // toolStripTextBoxPassword
             // 
+            this.toolStripTextBoxPassword.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxPassword.Name = "toolStripTextBoxPassword";
             this.toolStripTextBoxPassword.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxPassword.Text = "1125518";
@@ -349,12 +359,6 @@
             this.menuDelete.Text = "删除";
             this.menuDelete.Click += new System.EventHandler(this.menuDelete_Click);
             // 
-            // toolStripTextBoxIpAddr
-            // 
-            this.toolStripTextBoxIpAddr.Name = "toolStripTextBoxIpAddr";
-            this.toolStripTextBoxIpAddr.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxIpAddr.Text = "192.168.0.102";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -365,6 +369,7 @@
             this.Controls.Add(this.tabControl2);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.toolStripInfo);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "Fast FTP";
