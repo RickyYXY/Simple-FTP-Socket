@@ -11,3 +11,4 @@ B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\bin\D
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.csproj.CoreCompileInputs.cache
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.exe
 B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.pdb
+B:\计算机网络实验\计网实验大作业2\Simple-FTP-Socket\FTPUtils\obj\Debug\FTPUtils.csprojAssemblyReference.cache

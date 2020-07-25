@@ -184,7 +184,7 @@ namespace FTPUtils
             dataSocket.Disconnect(true);
 
             //将得到的文件信息分成一行一行，以\r\n分割
-            string rawInfo = Encoding.UTF8.GetString(ms.ToArray());
+            string rawInfo = Encoding.GetEncoding("gb2312").GetString(ms.ToArray());
             if (rawInfo.LastIndexOf("\r\n") == rawInfo.Length - 2)
                 rawInfo = rawInfo.Remove(rawInfo.Length - 2, 2);
             string[] filesInfo = Regex.Split(rawInfo, @"\r\n");
