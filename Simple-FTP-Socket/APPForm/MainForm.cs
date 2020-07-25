@@ -152,6 +152,8 @@ namespace APPForm
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
+            if (ftpClient != null)
+                ftpClient.Close();
             try
             {
                 if (CheckUserInfo())
@@ -160,7 +162,23 @@ namespace APPForm
                     string port = this.toolStripTextBoxPort.Text.Trim();
                     string userName = this.toolStripTextBoxName.Text.Trim();
                     string password = this.toolStripTextBoxPassword.Text.Trim();
-                    ftpClient = new FTPClient(ipAddr, port, userName, password);
+                    ftpClient = new FTPClient(ipAddr, port, userName, password);                    
+                    if (!ftpClient.Connect())
+                    {
+                        lblMsg.Text = "连接失败";
+                    }
+                    else
+                    {
+                        if (ftpClient.Login())
+                        {
+                            lblMsg.Text = "登录成功";
+                        }
+                        else
+                        {
+                            lblMsg.Text = "用户名/密码出错";
+                            ftpClient.Close();
+                        }
+                    }
                     ShowFilesDirectory();
                 }
             }
@@ -422,6 +440,12 @@ namespace APPForm
                 return;
             }
             toolStripProgressBar1.Value = (int)((double)progress / total * 100);
+        }
+
+        private void toolStripButtonDisconnect_Click(object sender, EventArgs e)
+        {
+            ftpClient.Close();
+            FTPflowLayoutPanel.Controls.Clear();
         }
     }
 }

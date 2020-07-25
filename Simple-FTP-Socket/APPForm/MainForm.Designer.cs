@@ -63,6 +63,7 @@
             this.menuRightKey = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuSaveAs = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButtonDisconnect = new System.Windows.Forms.ToolStripButton();
             this.toolStripInfo.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -90,7 +91,8 @@
             this.toolStripLabel3,
             this.toolStripTextBoxPassword,
             this.toolStripSeparator3,
-            this.btnLogin});
+            this.btnLogin,
+            this.toolStripButtonDisconnect});
             this.toolStripInfo.Location = new System.Drawing.Point(0, 0);
             this.toolStripInfo.Name = "toolStripInfo";
             this.toolStripInfo.Size = new System.Drawing.Size(1268, 32);
@@ -361,6 +363,15 @@
             this.menuDelete.Text = "删除";
             this.menuDelete.Click += new System.EventHandler(this.menuDelete_Click);
             // 
+            // toolStripButtonDisconnect
+            // 
+            this.toolStripButtonDisconnect.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonDisconnect.Image")));
+            this.toolStripButtonDisconnect.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonDisconnect.Name = "toolStripButtonDisconnect";
+            this.toolStripButtonDisconnect.Size = new System.Drawing.Size(98, 29);
+            this.toolStripButtonDisconnect.Text = "断开连接";
+            this.toolStripButtonDisconnect.Click += new System.EventHandler(this.toolStripButtonDisconnect_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -427,6 +438,7 @@
         private System.Windows.Forms.ToolStrip toolStripForFTP;
         private System.Windows.Forms.ToolStripButton toolStripButtonReturn;
         private System.Windows.Forms.ToolStripButton toolStripButtonRefresh;
+        private System.Windows.Forms.ToolStripButton toolStripButtonDisconnect;
     }
 }
 

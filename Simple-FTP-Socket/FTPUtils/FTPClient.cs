@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
+using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 
@@ -18,34 +19,15 @@ namespace FTPUtils
 
     public class FTPClient
     {
-        #region 属性
-        /// <summary>
-        /// IP地址
-        /// </summary>
         public string IpAddr { get; set; }
-
-        /// <summary>
-        /// 相对路径
-        /// </summary>
         public string RelatePath { get; set; }
-
-        /// <summary>
-        /// 端口号
-        /// </summary>
         public string Port { get; set; }
-
-        /// <summary>
-        /// 用户名
-        /// </summary>
         public string UserName { get; set; }
-
-        /// <summary>
-        /// 密码
-        /// </summary>
         public string Password { get; set; }
-        #endregion
 
-        #region 构造函数
+        private Socket socket;
+        private const int BUFFER_SIZE = 4096;
+
         public FTPClient() { }
         public FTPClient(string ipAddr, string port, string userName, string password)
         {
@@ -54,7 +36,77 @@ namespace FTPUtils
             UserName = userName;
             Password = password;
         }
-        #endregion
+
+        /// <summary>
+        /// 开启连接
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public bool Connect()
+        {
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                socket.Connect(new IPEndPoint(IPAddress.Parse(IpAddr), int.Parse(Port)));               
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 使用账户登录FTP服务器
+        /// </summary>
+        /// <param name="UserName"></param>
+        /// <param name="Password"></param>
+        /// <returns></returns>
+        public bool Login()
+        {
+            socket.Send(Encoding.UTF8.GetBytes(UserName + "??" + Password));
+            byte[] bytes = new byte[BUFFER_SIZE];
+            int size = socket.Receive(bytes, bytes.Length, 0);
+            string response = Encoding.UTF8.GetString(bytes, 0, size);
+            if (response.Equals("LOGIN_SUCCESS"))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        public void Close()
+        {
+            if (socket == null)
+                return;
+            try
+            {
+                socket.Send(Encoding.UTF8.GetBytes("{\"action\":\"quit\"}"));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            socket.Close();
+        }
+
+        /// <summary>
+        /// 获取当前路径下服务器端的文件信息
+        /// </summary>
+        /// <returns></returns>
+        public string[] Dir()
+        {
+            socket.Send(Encoding.UTF8.GetBytes("{\"action\":\"dir\"}"));
+            byte[] bytes = new byte[BUFFER_SIZE];
+            int size = socket.Receive(bytes, bytes.Length, 0);
+            string response = Encoding.UTF8.GetString(bytes, 0, size);
+            string[] names = response.Split('\n');
+            return names;
+        }
 
         /// <summary>
         /// 获取服务器端的文件信息
