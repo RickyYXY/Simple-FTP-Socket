@@ -304,9 +304,10 @@ namespace APPForm
                     //创建一个临时控件用于显示ftp服务器端的文件
                     Button btnTmp = new Button()
                     {
-                        BackColor = Color.White,
+                        BackColor = Color.Azure,
                         TextImageRelation = TextImageRelation.ImageAboveText,
                         Text = name,
+                        Font = new Font("微软雅黑",9),
                         Width = 80,
                         Height = 80
                     };

@@ -63,6 +63,7 @@
             this.menuRightKey = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuSaveAs = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.toolStripInfo.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -72,11 +73,12 @@
             this.toolStripForFTP.SuspendLayout();
             this.statusStripMain.SuspendLayout();
             this.menuRightKey.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripInfo
             // 
-            this.toolStripInfo.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.toolStripInfo.BackColor = System.Drawing.Color.LightBlue;
             this.toolStripInfo.ImageScalingSize = new System.Drawing.Size(25, 25);
             this.toolStripInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
@@ -100,15 +102,15 @@
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(54, 29);
-            this.toolStripLabel1.Text = "主机：";
+            this.toolStripLabel1.Size = new System.Drawing.Size(99, 29);
+            this.toolStripLabel1.Text = "服务器地址：";
             // 
             // toolStripTextBoxIpAddr
             // 
-            this.toolStripTextBoxIpAddr.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxIpAddr.Name = "toolStripTextBoxIpAddr";
             this.toolStripTextBoxIpAddr.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxIpAddr.Text = "192.168.0.102";
+            this.toolStripTextBoxIpAddr.ToolTipText = "请输入FTP服务器地址";
             // 
             // toolStripLabel4
             // 
@@ -118,10 +120,10 @@
             // 
             // toolStripTextBoxPort
             // 
-            this.toolStripTextBoxPort.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxPort.Name = "toolStripTextBoxPort";
             this.toolStripTextBoxPort.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxPort.Text = "21";
+            this.toolStripTextBoxPort.ToolTipText = "请输入端口号\r\n(FTP默认21)";
             // 
             // toolStripSeparator1
             // 
@@ -136,11 +138,10 @@
             // 
             // toolStripTextBoxName
             // 
-            this.toolStripTextBoxName.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxName.Name = "toolStripTextBoxName";
             this.toolStripTextBoxName.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxName.Text = "yxy";
-            this.toolStripTextBoxName.ToolTipText = "输入用户名";
+            this.toolStripTextBoxName.ToolTipText = "请输入用户名";
             // 
             // toolStripSeparator2
             // 
@@ -178,29 +179,35 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Location = new System.Drawing.Point(0, 36);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabControl1.Location = new System.Drawing.Point(4, 4);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(439, 689);
+            this.tabControl1.Size = new System.Drawing.Size(499, 690);
             this.tabControl1.TabIndex = 1;
             // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.treeLocal);
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage1.Location = new System.Drawing.Point(4, 28);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage1.Size = new System.Drawing.Size(431, 660);
+            this.tabPage1.Size = new System.Drawing.Size(491, 658);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "本地驱动器";
+            this.tabPage1.Text = "本地文件";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // treeLocal
             // 
+            this.treeLocal.BackColor = System.Drawing.Color.Azure;
+            this.treeLocal.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.treeLocal.ContextMenuStrip = this.menuLocal;
             this.treeLocal.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeLocal.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.treeLocal.ImageIndex = 0;
             this.treeLocal.ImageList = this.imgList;
             this.treeLocal.Location = new System.Drawing.Point(4, 4);
@@ -211,7 +218,7 @@
             this.treeLocal.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode1});
             this.treeLocal.SelectedImageIndex = 0;
-            this.treeLocal.Size = new System.Drawing.Size(423, 652);
+            this.treeLocal.Size = new System.Drawing.Size(483, 650);
             this.treeLocal.TabIndex = 0;
             this.treeLocal.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeLocal_BeforeExpand);
             this.treeLocal.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeLocal_AfterSelect);
@@ -247,22 +254,25 @@
             // tabControl2
             // 
             this.tabControl2.Controls.Add(this.tabPage2);
-            this.tabControl2.Location = new System.Drawing.Point(441, 36);
+            this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl2.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabControl2.Location = new System.Drawing.Point(511, 4);
             this.tabControl2.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(827, 689);
+            this.tabControl2.Size = new System.Drawing.Size(753, 690);
             this.tabControl2.TabIndex = 2;
             // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.FTPflowLayoutPanel);
             this.tabPage2.Controls.Add(this.toolStripForFTP);
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage2.Location = new System.Drawing.Point(4, 28);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage2.Size = new System.Drawing.Size(819, 660);
+            this.tabPage2.Size = new System.Drawing.Size(745, 658);
             this.tabPage2.TabIndex = 0;
             this.tabPage2.Text = "FTP服务器";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -270,10 +280,11 @@
             // FTPflowLayoutPanel
             // 
             this.FTPflowLayoutPanel.AutoScroll = true;
+            this.FTPflowLayoutPanel.BackColor = System.Drawing.Color.Azure;
             this.FTPflowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FTPflowLayoutPanel.Location = new System.Drawing.Point(4, 36);
             this.FTPflowLayoutPanel.Name = "FTPflowLayoutPanel";
-            this.FTPflowLayoutPanel.Size = new System.Drawing.Size(811, 620);
+            this.FTPflowLayoutPanel.Size = new System.Drawing.Size(737, 618);
             this.FTPflowLayoutPanel.TabIndex = 0;
             // 
             // toolStripForFTP
@@ -284,7 +295,7 @@
             this.toolStripButtonRefresh});
             this.toolStripForFTP.Location = new System.Drawing.Point(4, 4);
             this.toolStripForFTP.Name = "toolStripForFTP";
-            this.toolStripForFTP.Size = new System.Drawing.Size(811, 32);
+            this.toolStripForFTP.Size = new System.Drawing.Size(737, 32);
             this.toolStripForFTP.TabIndex = 2;
             this.toolStripForFTP.Text = "toolStrip2";
             // 
@@ -308,6 +319,7 @@
             // 
             // statusStripMain
             // 
+            this.statusStripMain.BackColor = System.Drawing.SystemColors.Control;
             this.statusStripMain.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
@@ -359,15 +371,29 @@
             this.menuDelete.Text = "删除";
             this.menuDelete.Click += new System.EventHandler(this.menuDelete_Click);
             // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tableLayoutPanel1.Controls.Add(this.tabControl1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tabControl2, 1, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 32);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1268, 698);
+            this.tableLayoutPanel1.TabIndex = 5;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.ClientSize = new System.Drawing.Size(1268, 756);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.statusStripMain);
-            this.Controls.Add(this.tabControl2);
-            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.toolStripInfo);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -387,6 +413,7 @@
             this.statusStripMain.ResumeLayout(false);
             this.statusStripMain.PerformLayout();
             this.menuRightKey.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -426,6 +453,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButtonReturn;
         private System.Windows.Forms.ToolStripButton toolStripButtonRefresh;
         private System.Windows.Forms.ToolStripTextBox toolStripTextBoxIpAddr;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
 
