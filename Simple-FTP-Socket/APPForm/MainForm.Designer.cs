@@ -107,10 +107,9 @@
             // 
             // toolStripTextBoxIpAddr
             // 
-            this.toolStripTextBoxIpAddr.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxIpAddr.Name = "toolStripTextBoxIpAddr";
             this.toolStripTextBoxIpAddr.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxIpAddr.Text = "192.168.0.102";
+            this.toolStripTextBoxIpAddr.Text = "192.168.0.104";
             this.toolStripTextBoxIpAddr.ToolTipText = "请输入FTP服务器地址";
             // 
             // toolStripLabel4
@@ -121,7 +120,6 @@
             // 
             // toolStripTextBoxPort
             // 
-            this.toolStripTextBoxPort.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxPort.Name = "toolStripTextBoxPort";
             this.toolStripTextBoxPort.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxPort.Text = "21";
@@ -140,10 +138,9 @@
             // 
             // toolStripTextBoxName
             // 
-            this.toolStripTextBoxName.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxName.Name = "toolStripTextBoxName";
             this.toolStripTextBoxName.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxName.Text = "ding0";
+            this.toolStripTextBoxName.Text = "yxy";
             this.toolStripTextBoxName.ToolTipText = "请输入用户名";
             // 
             // toolStripSeparator2
@@ -159,10 +156,9 @@
             // 
             // toolStripTextBoxPassword
             // 
-            this.toolStripTextBoxPassword.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxPassword.Name = "toolStripTextBoxPassword";
             this.toolStripTextBoxPassword.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxPassword.Text = "13986251398Dj";
+            this.toolStripTextBoxPassword.Text = "1125518";
             this.toolStripTextBoxPassword.ToolTipText = "请输入密码";
             // 
             // toolStripSeparator3

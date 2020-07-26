@@ -159,7 +159,7 @@ namespace FTPUtils
             if (!EnterPassiveMode())
                 throw new Exception("无法接收数据！");
             dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
-            cmdSocket.Send(Encoding.UTF8.GetBytes("LIST " + RelatePath + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("LIST " + RelatePath + "\r\n"));
             string response = CmdSocketReceive();
             while (!response.Contains("226"))
                 response = CmdSocketReceive();
@@ -207,6 +207,19 @@ namespace FTPUtils
         }
 
         /// <summary>
+        /// 获取上级目录
+        /// </summary>
+        public string GetPrePath()
+        {
+            string relatePath = RelatePath;
+            if (string.IsNullOrEmpty(relatePath) || relatePath.LastIndexOf("/") == 0)
+                relatePath = "";
+            else
+                relatePath = relatePath.Substring(0, relatePath.LastIndexOf("/"));
+            return relatePath;
+        }
+
+        /// <summary>
         /// 设置相对路径
         /// </summary>
         /// <param name="folderName"></param>
@@ -221,7 +234,7 @@ namespace FTPUtils
         /// <param name="isOK"></param>
         public void DeleteFile(out bool isOK)
         {
-            cmdSocket.Send(Encoding.UTF8.GetBytes("DELE " + RelatePath + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("DELE " + RelatePath + "\r\n"));
             string response = CmdSocketReceive();
             if (response.StartsWith("250"))
                 isOK = true;
@@ -238,13 +251,16 @@ namespace FTPUtils
             long totalDownloadedByte = size;
             var totalBytes = GetFileSize();
             if (totalBytes == -1) throw new Exception("无法获取远程文件的文件大小，或该远程文件已经不存在");
-            cmdSocket.Send(Encoding.UTF8.GetBytes("CWD " + RelatePath + "\r\n"));
+
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + this.GetPrePath() + "\r\n"));
             string response = CmdSocketReceive();
+            if (!response.StartsWith("250"))
+                throw new Exception("文件目录访问出错");
+            /*response = CmdSocketReceive();
             response = CmdSocketReceive();
             response = CmdSocketReceive();
             response = CmdSocketReceive();
-            response = CmdSocketReceive();
-            response = CmdSocketReceive();
+            response = CmdSocketReceive();*/
             EnterPassiveMode();
             cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + size + "\r\n"));
             response = CmdSocketReceive();
@@ -252,7 +268,7 @@ namespace FTPUtils
             {
                 throw new Exception("响应错误");
             }
-            cmdSocket.Send(Encoding.UTF8.GetBytes("RETR " + RelatePath + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RETR " + RelatePath + "\r\n"));
             response = CmdSocketReceive();
             if (!response.StartsWith("125") && !response.StartsWith("150"))
             {
@@ -358,7 +374,7 @@ namespace FTPUtils
         {
             try
             {
-                cmdSocket.Send(Encoding.UTF8.GetBytes("SIZE " + RelatePath + "\r\n"));
+                cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("SIZE " + RelatePath + "\r\n"));
                 var response = CmdSocketReceive();
                 if (response.StartsWith("213"))
                 {
@@ -384,26 +400,5 @@ namespace FTPUtils
             return null;
         }
 
-        private void Rename(string filename)
-        {
-            try
-            {
-                string uri = string.Format("ftp://{0}:{1}{2}", this.IpAddr, this.Port, this.RelatePath + ".temp");
-                FtpWebRequest request = (FtpWebRequest)FtpWebRequest.Create(new Uri(uri));
-                request.Credentials = new NetworkCredential(UserName, Password);
-                request.UseBinary = true;
-                request.Method = WebRequestMethods.Ftp.Rename;
-                request.RenameTo = filename;
-                request.KeepAlive = false;
-
-                FtpWebResponse ftpWebResponse = (FtpWebResponse)request.GetResponse();
-                Stream ftpResponseStream = ftpWebResponse.GetResponseStream();
-
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
     }
 }
