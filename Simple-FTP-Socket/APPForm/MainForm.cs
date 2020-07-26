@@ -129,7 +129,9 @@ namespace APPForm
             {
                 lblMsg.Text = "上传中";
                 ToolStripMenuItem mi = (ToolStripMenuItem)sender;
-                string path = mi.Tag.ToString();
+                string path = "";
+                if (mi != null)
+                    path = mi.Tag.ToString();
                 if (File.Exists(path))
                 {
                     ftpClient.RelatePath = string.Format("{0}/{1}", ftpClient.RelatePath, Path.GetFileName(path));
@@ -424,6 +426,7 @@ namespace APPForm
 
                     lblMsg.Text = "下载成功";
                     MessageBox.Show("下载完成");
+                    toolStripProgressBar1.Value = 0;
                 }
                 catch(Exception ex)
                 {

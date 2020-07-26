@@ -129,12 +129,12 @@ namespace FTPUtils
             // 启用 Binary Mode
             cmdSocket.Send(Encoding.UTF8.GetBytes("TYPE I" + "\r\n"));
             string response = CmdSocketReceive();
-            if (!response.StartsWith("200")) //200  命令成功
+            if (!response.Contains("200")) //200  命令成功
                 return false;
             // 进入被动模式
             cmdSocket.Send(Encoding.UTF8.GetBytes("PASV" + "\r\n"));
             response = CmdSocketReceive();
-            if (response.StartsWith("227")) //227 进入被动模式
+            if (response.Contains("227")) //227 进入被动模式
             {
                 int server_data_port;   // Unspecified
                                         // 解析被动模式下服务器数据端口，比如：(127,0,0,1,74,93)
@@ -319,7 +319,7 @@ namespace FTPUtils
 
 
             string response;
-            cmdSocket.Send(Encoding.UTF8.GetBytes("CWD " + RelatePath + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + GetPrePath() + "\r\n"));
             response = CmdSocketReceive();
             EnterPassiveMode();
             if (startbye > 0)
@@ -338,7 +338,7 @@ namespace FTPUtils
             }
 
 
-            cmdSocket.Send(Encoding.UTF8.GetBytes("STOR " + RelatePath + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("STOR " + RelatePath + "\r\n"));
             response = CmdSocketReceive();
             if (!response.StartsWith("125") && !response.StartsWith("150"))
             {
@@ -364,9 +364,9 @@ namespace FTPUtils
             dataSocket.Shutdown(SocketShutdown.Send);
             dataSocket.Disconnect(true);
 
-            cmdSocket.Send(Encoding.UTF8.GetBytes("RNFR " + RelatePath + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RNFR " + RelatePath + "\r\n"));
             CmdSocketReceive();
-            cmdSocket.Send(Encoding.UTF8.GetBytes("RNTO " + RelatePath.Substring(0,RelatePath.Length - 5) + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RNTO " + RelatePath.Substring(0,RelatePath.Length - 5) + "\r\n"));
             CmdSocketReceive();
         }
 
