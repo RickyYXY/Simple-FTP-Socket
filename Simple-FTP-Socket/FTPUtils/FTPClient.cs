@@ -129,12 +129,26 @@ namespace FTPUtils
             // 启用 Binary Mode
             cmdSocket.Send(Encoding.UTF8.GetBytes("TYPE I" + "\r\n"));
             string response = CmdSocketReceive();
-            if (!response.Contains("200")) //200  命令成功
+            int clock = 0;
+            while (!response.Contains("200") && clock < 10) //200  命令成功
+            {
+                response = CmdSocketReceive();
+                clock++;
+            }
+            if (clock >= 10) 
                 return false;
             // 进入被动模式
             cmdSocket.Send(Encoding.UTF8.GetBytes("PASV" + "\r\n"));
             response = CmdSocketReceive();
-            if (response.Contains("227")) //227 进入被动模式
+            clock = 0;
+            while (!response.Contains("227") && clock < 10)//227 进入被动模式
+            {
+                response = CmdSocketReceive();
+                clock++;
+            }
+            if (clock >= 10)
+                return false;
+            else
             {
                 int server_data_port;   // Unspecified
                                         // 解析被动模式下服务器数据端口，比如：(127,0,0,1,74,93)
@@ -147,7 +161,6 @@ namespace FTPUtils
                 dataSocket.ConnectAsync(new IPEndPoint(IPAddress.Parse(IpAddr), server_data_port)).Wait();
                 return true;
             }
-            return false;
         }
 
         /// <summary>
@@ -251,11 +264,11 @@ namespace FTPUtils
             long totalDownloadedByte = size;
             var totalBytes = GetFileSize();
             if (totalBytes == -1) throw new Exception("无法获取远程文件的文件大小，或该远程文件已经不存在");
-
-            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + this.GetPrePath() + "\r\n"));
-            string response = CmdSocketReceive();
-            if (!response.StartsWith("250"))
-                throw new Exception("文件目录访问出错");
+            string response;
+            //cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + this.GetPrePath() + "\r\n"));
+            //string response = CmdSocketReceive();
+            //if (!response.StartsWith("250"))
+                //throw new Exception("文件目录访问出错");
             /*response = CmdSocketReceive();
             response = CmdSocketReceive();
             response = CmdSocketReceive();
@@ -264,13 +277,13 @@ namespace FTPUtils
             EnterPassiveMode();
             cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + size + "\r\n"));
             response = CmdSocketReceive();
-            if (!response.StartsWith("300") && !response.StartsWith("350"))
+            if (!response.Contains("300") && !response.Contains("350"))
             {
                 throw new Exception("响应错误");
             }
             cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RETR " + RelatePath + "\r\n"));
             response = CmdSocketReceive();
-            if (!response.StartsWith("125") && !response.StartsWith("150"))
+            if (!response.Contains("125") && !response.Contains("150"))
             {
                 throw new Exception("响应错误");
             }
@@ -291,7 +304,7 @@ namespace FTPUtils
                 }
             }
             response = CmdSocketReceive();
-            if (response.StartsWith("226"))
+            if (response.Contains("226"))
             {
                 dataSocket.Shutdown(SocketShutdown.Send);
                 dataSocket.Disconnect(true);
@@ -315,35 +328,31 @@ namespace FTPUtils
             RelatePath += ".temp";
             long startfilesize = GetFileSize();
             long startbye = startfilesize <= 0 ? 0 : startfilesize;
-            updateProgress((int)allbye, (int)startfilesize);//更新进度条   
-
+            updateProgress((int)allbye, (int)startbye);//更新进度条   
 
             string response;
-            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + GetPrePath() + "\r\n"));
-            response = CmdSocketReceive();
+            //cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + GetPrePath() + "\r\n"));
+            //response = CmdSocketReceive();
             EnterPassiveMode();
             if (startbye > 0)
             {
                 cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + startbye + "\r\n"));
                 response = CmdSocketReceive();
-                if (!response.StartsWith("300") && !response.StartsWith("350"))
-                {
+                if (!response.Contains("300") && !response.Contains("350"))
                     throw new Exception("响应错误");
-                }
             }
             else
             {
                 cmdSocket.Send(Encoding.UTF8.GetBytes("ALLO " + allbye + "\r\n"));
                 response = CmdSocketReceive();
+                while (!response.Contains("200"))
+                    response = CmdSocketReceive();
             }
-
 
             cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("STOR " + RelatePath + "\r\n"));
             response = CmdSocketReceive();
-            if (!response.StartsWith("125") && !response.StartsWith("150"))
-            {
+            if (!response.Contains("125") && !response.Contains("150"))
                 throw new Exception("响应错误");
-            }
 
             using (FileStream fs = fileInf.OpenRead())
             {
@@ -377,9 +386,7 @@ namespace FTPUtils
                 cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("SIZE " + RelatePath + "\r\n"));
                 var response = CmdSocketReceive();
                 if (response.StartsWith("213"))
-                {
                     return long.Parse(response.Substring(4, response.Length - 4));
-                }
                 return -1;
             }
             catch

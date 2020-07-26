@@ -130,7 +130,7 @@ namespace APPForm
                 lblMsg.Text = "上传中";
                 ToolStripMenuItem mi = (ToolStripMenuItem)sender;
                 string path = "";
-                if (mi != null)
+                if (mi.Tag != null)
                     path = mi.Tag.ToString();
                 if (File.Exists(path))
                 {
@@ -138,6 +138,7 @@ namespace APPForm
                     ftpClient.Upload(path, updateProgress);
                     lblMsg.Text = "上传成功";
                     MessageBox.Show("上传完成");
+                    toolStripProgressBar1.Value = 0;
                 }
             }
             catch(Exception ex)
