@@ -127,15 +127,15 @@ namespace APPForm
                 }
             try
             {
-                
+                lblMsg.Text = "上传中";
                 ToolStripMenuItem mi = (ToolStripMenuItem)sender;
                 string path = mi.Tag.ToString();
                 if (File.Exists(path))
                 {
                     ftpClient.RelatePath = string.Format("{0}/{1}", ftpClient.RelatePath, Path.GetFileName(path));
                     ftpClient.Upload(path, updateProgress);
-                    ShowFilesDirectory();
                     lblMsg.Text = "上传成功";
+                    MessageBox.Show("上传完成");
                 }
             }
             catch(Exception ex)
@@ -145,8 +145,9 @@ namespace APPForm
             }
             finally
             {
-
                 ftpClient.SetPrePath();
+                ShowFilesDirectory();
+                lblMsg.Text = "";
             }
         }
 

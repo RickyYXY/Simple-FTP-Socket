@@ -240,6 +240,11 @@ namespace FTPUtils
             if (totalBytes == -1) throw new Exception("无法获取远程文件的文件大小，或该远程文件已经不存在");
             cmdSocket.Send(Encoding.UTF8.GetBytes("CWD " + RelatePath + "\r\n"));
             string response = CmdSocketReceive();
+            response = CmdSocketReceive();
+            response = CmdSocketReceive();
+            response = CmdSocketReceive();
+            response = CmdSocketReceive();
+            response = CmdSocketReceive();
             EnterPassiveMode();
             cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + size + "\r\n"));
             response = CmdSocketReceive();
@@ -337,12 +342,16 @@ namespace FTPUtils
                     contentLen = fs.Read(buffer, 0, buffLength);
                     startbye += contentLen;
                     updateProgress((int)allbye, (int)startbye);
-
                 }
+                updateProgress(1, 1);
             }
             dataSocket.Shutdown(SocketShutdown.Send);
             dataSocket.Disconnect(true);
 
+            cmdSocket.Send(Encoding.UTF8.GetBytes("RNFR " + RelatePath + "\r\n"));
+            CmdSocketReceive();
+            cmdSocket.Send(Encoding.UTF8.GetBytes("RNTO " + RelatePath.Substring(0,RelatePath.Length - 5) + "\r\n"));
+            CmdSocketReceive();
         }
 
         private long GetFileSize()
