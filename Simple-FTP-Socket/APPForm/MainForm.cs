@@ -154,13 +154,6 @@ namespace APPForm
             }
         }
 
-        private void toolStripButton2_Click(object sender, EventArgs e)
-        {
-            //如果就目录,先设置上级目录，再列出目录
-            //ftpClient.SetPrePath();
-            //this.ListDirectory();
-        }
-
         private void btnLogin_Click(object sender, EventArgs e)
         {
             try
@@ -269,7 +262,7 @@ namespace APPForm
                         ShowFilesDirectory();//再次列出目录
                         break;
                     default:
-                        MessageBox.Show("非目录，请点击右键", "提示", MessageBoxButtons.OK);
+                        //MessageBox.Show("非目录，请点击右键", "提示", MessageBoxButtons.OK);
                         break;
                 }
             }
