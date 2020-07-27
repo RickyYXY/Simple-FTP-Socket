@@ -109,15 +109,20 @@ namespace FTPUtils
         {
             try
             {
-                cmdSocket.Send(Encoding.UTF8.GetBytes("QUIT" + "\r\n"));
-                CmdSocketReceive();
+                if(cmdSocket.Connected)
+                {
+                    cmdSocket.Send(Encoding.UTF8.GetBytes("QUIT" + "\r\n"));
+                    CmdSocketReceive();
+                }                
             }
             catch (Exception)
             {
                 throw;
             }
-            cmdSocket.Close();
-            dataSocket.Close();
+            if (!cmdSocket.Connected)
+                cmdSocket.Close();
+            if (!dataSocket.Connected)
+                dataSocket.Close();
         }
 
         /// <summary>
