@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("计算机");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("计算机");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStripInfo = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
@@ -109,7 +109,6 @@
             // 
             this.toolStripTextBoxIpAddr.Name = "toolStripTextBoxIpAddr";
             this.toolStripTextBoxIpAddr.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxIpAddr.Text = "192.168.0.104";
             this.toolStripTextBoxIpAddr.ToolTipText = "请输入FTP服务器地址";
             // 
             // toolStripLabel4
@@ -120,6 +119,7 @@
             // 
             // toolStripTextBoxPort
             // 
+            this.toolStripTextBoxPort.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBoxPort.Name = "toolStripTextBoxPort";
             this.toolStripTextBoxPort.Size = new System.Drawing.Size(132, 32);
             this.toolStripTextBoxPort.Text = "21";
@@ -140,7 +140,6 @@
             // 
             this.toolStripTextBoxName.Name = "toolStripTextBoxName";
             this.toolStripTextBoxName.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxName.Text = "yxy";
             this.toolStripTextBoxName.ToolTipText = "请输入用户名";
             // 
             // toolStripSeparator2
@@ -158,7 +157,6 @@
             // 
             this.toolStripTextBoxPassword.Name = "toolStripTextBoxPassword";
             this.toolStripTextBoxPassword.Size = new System.Drawing.Size(132, 32);
-            this.toolStripTextBoxPassword.Text = "1125518";
             this.toolStripTextBoxPassword.ToolTipText = "请输入密码";
             // 
             // toolStripSeparator3
@@ -212,10 +210,10 @@
             this.treeLocal.Location = new System.Drawing.Point(4, 4);
             this.treeLocal.Margin = new System.Windows.Forms.Padding(4);
             this.treeLocal.Name = "treeLocal";
-            treeNode1.Name = "节点0";
-            treeNode1.Text = "计算机";
+            treeNode2.Name = "节点0";
+            treeNode2.Text = "计算机";
             this.treeLocal.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.treeLocal.SelectedImageIndex = 0;
             this.treeLocal.Size = new System.Drawing.Size(483, 650);
             this.treeLocal.TabIndex = 0;

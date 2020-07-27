@@ -135,7 +135,7 @@ namespace FTPUtils
                 response = CmdSocketReceive();
                 clock++;
             }
-            if (clock >= 10) 
+            if (clock >= 10)
                 return false;
             // 进入被动模式
             cmdSocket.Send(Encoding.UTF8.GetBytes("PASV" + "\r\n"));
@@ -169,34 +169,42 @@ namespace FTPUtils
         /// <returns></returns>
         public string[] GetFilesList()
         {
-            if (!EnterPassiveMode())
-                throw new Exception("无法接收数据！");
-            dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
-            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("LIST " + RelatePath + "\r\n"));
-            string response = CmdSocketReceive();
-            while (!response.Contains("226"))
-                response = CmdSocketReceive();
+            MemoryStream ms;
+            try
+            {
+                if (!EnterPassiveMode())
+                    throw new Exception("无法接收数据！");
+                dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
+                cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("LIST " + RelatePath + "\r\n"));
+                string response = CmdSocketReceive();
+                while (!response.Contains("226"))
+                    response = CmdSocketReceive();
 
-            MemoryStream ms = new MemoryStream();
-            byte[] buf = new byte[1 * 1024 * 1024];
-            int length = 0;
-            while (dataSocket.Available > 0 || (length >= 1 && buf[length - 1] != '\n'))
-            {
-                length = dataSocket.Receive(buf);
-                // Connected 只反映上一个 Receive/Send 操作时的 Socket 状态
-                if (dataSocket.Connected == false) throw new Exception("远程主机断开连接");
-                ms.Write(buf, 0, length);
+                ms = new MemoryStream();
+                byte[] buf = new byte[1 * 1024 * 1024];
+                int length = 0;
+                while (dataSocket.Available > 0 || (length >= 1 && buf[length - 1] != '\n'))
+                {
+                    length = dataSocket.Receive(buf);
+                    // Connected 只反映上一个 Receive/Send 操作时的 Socket 状态
+                    if (dataSocket.Connected == false) throw new Exception("远程主机断开连接");
+                    ms.Write(buf, 0, length);
+                }
+                while (true)
+                {
+                    length = dataSocket.Receive(buf);
+                    if (length == 0) break;
+                    ms.Write(buf, 0, length);
+                }
             }
-            // 发送FIN
-            dataSocket.Shutdown(SocketShutdown.Send);
-            // 接收所有剩余的数据，直到Receive返回0，表明对方已发送FIN
-            while (true)
+            finally
             {
-                length = dataSocket.Receive(buf);
-                if (length == 0) break;
-                ms.Write(buf, 0, length);
+                if (dataSocket.Connected)
+                {
+                    dataSocket.Shutdown(SocketShutdown.Send);
+                    dataSocket.Disconnect(true);
+                }
             }
-            dataSocket.Disconnect(true);
 
             //将得到的文件信息分成一行一行，以\r\n分割
             string rawInfo = Encoding.GetEncoding("gb2312").GetString(ms.ToArray());
@@ -255,63 +263,56 @@ namespace FTPUtils
                 isOK = false;
         }
 
-        /**************************************************************************************************/
-
-
-
         public void Download(string filepath, long size, Action<int, int> updateProgress)
         {
             long totalDownloadedByte = size;
             var totalBytes = GetFileSize();
             if (totalBytes == -1) throw new Exception("无法获取远程文件的文件大小，或该远程文件已经不存在");
             string response;
-            //cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + this.GetPrePath() + "\r\n"));
-            //string response = CmdSocketReceive();
-            //if (!response.StartsWith("250"))
-                //throw new Exception("文件目录访问出错");
-            /*response = CmdSocketReceive();
-            response = CmdSocketReceive();
-            response = CmdSocketReceive();
-            response = CmdSocketReceive();
-            response = CmdSocketReceive();*/
-            EnterPassiveMode();
-            cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + size + "\r\n"));
-            response = CmdSocketReceive();
-            if (!response.Contains("300") && !response.Contains("350"))
+            try
             {
-                throw new Exception("响应错误");
-            }
-            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RETR " + RelatePath + "\r\n"));
-            response = CmdSocketReceive();
-            if (!response.Contains("125") && !response.Contains("150"))
-            {
-                throw new Exception("响应错误");
-            }
-            using (FileStream outputStream = new FileStream(filepath, FileMode.Append))
-            {
-
-                dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
-
-                byte[] buffer = new byte[1 * 1024 * 1024];
-                int readCount = dataSocket.Receive(buffer);
-                updateProgress((int)totalBytes, (int)totalDownloadedByte);
-                while (readCount > 0)
+                EnterPassiveMode();
+                cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + size + "\r\n"));
+                response = CmdSocketReceive();
+                if (!response.Contains("300") && !response.Contains("350"))
                 {
-                    totalDownloadedByte += readCount;
-                    outputStream.Write(buffer, 0, readCount);
+                    throw new Exception("响应错误");
+                }
+                cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RETR " + RelatePath + "\r\n"));
+                response = CmdSocketReceive();
+                if (!response.Contains("125") && !response.Contains("150"))
+                {
+                    throw new Exception("响应错误");
+                }
+                using (FileStream outputStream = new FileStream(filepath, FileMode.Append))
+                {
+
+                    dataSocket.ReceiveBufferSize = 1 * 1024 * 1024;
+
+                    byte[] buffer = new byte[1 * 1024 * 1024];
+                    int readCount = dataSocket.Receive(buffer);
                     updateProgress((int)totalBytes, (int)totalDownloadedByte);
-                    readCount = dataSocket.Receive(buffer);
+                    while (readCount > 0)
+                    {
+                        totalDownloadedByte += readCount;
+                        outputStream.Write(buffer, 0, readCount);
+                        updateProgress((int)totalBytes, (int)totalDownloadedByte);
+                        readCount = dataSocket.Receive(buffer);
+                    }
+                }
+                response = CmdSocketReceive();
+                if (!response.Contains("226"))
+                {
+                    throw new Exception("响应错误");
                 }
             }
-            response = CmdSocketReceive();
-            if (response.Contains("226"))
+            finally
             {
-                dataSocket.Shutdown(SocketShutdown.Send);
-                dataSocket.Disconnect(true);
-            }
-            else
-            {
-                throw new Exception("响应错误");
+                if (dataSocket.Connected)
+                {
+                    dataSocket.Shutdown(SocketShutdown.Send);
+                    dataSocket.Disconnect(true);
+                }
             }
 
         }
@@ -331,80 +332,74 @@ namespace FTPUtils
             updateProgress((int)allbye, (int)startbye);//更新进度条   
 
             string response;
-            //cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("CWD " + GetPrePath() + "\r\n"));
-            //response = CmdSocketReceive();
-            EnterPassiveMode();
-            if (startbye > 0)
+            try
             {
-                cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + startbye + "\r\n"));
-                response = CmdSocketReceive();
-                if (!response.Contains("300") && !response.Contains("350"))
-                    throw new Exception("响应错误");
-            }
-            else
-            {
-                cmdSocket.Send(Encoding.UTF8.GetBytes("ALLO " + allbye + "\r\n"));
-                response = CmdSocketReceive();
-                while (!response.Contains("200"))
-                    response = CmdSocketReceive();
-            }
-
-            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("STOR " + RelatePath + "\r\n"));
-            response = CmdSocketReceive();
-            if (!response.Contains("125") && !response.Contains("150"))
-                throw new Exception("响应错误");
-
-            using (FileStream fs = fileInf.OpenRead())
-            {
-                int buffLength = 1 * 1024 * 1024;
-                byte[] buffer = new byte[buffLength];
-                dataSocket.SendBufferSize = buffLength;
-                fs.Seek(startbye, 0);
-                int contentLen = fs.Read(buffer, 0, buffLength);
-                while (contentLen != 0)
+                EnterPassiveMode();
+                if (startbye > 0)
                 {
-                    dataSocket.Send(buffer, 0, contentLen, SocketFlags.None);
-                    contentLen = fs.Read(buffer, 0, buffLength);
-                    startbye += contentLen;
-                    updateProgress((int)allbye, (int)startbye);
+                    cmdSocket.Send(Encoding.UTF8.GetBytes("REST " + startbye + "\r\n"));
+                    response = CmdSocketReceive();
+                    if (!response.Contains("300") && !response.Contains("350"))
+                        throw new Exception("响应错误");
                 }
-                updateProgress(1, 1);
+                else
+                {
+                    cmdSocket.Send(Encoding.UTF8.GetBytes("ALLO " + allbye + "\r\n"));
+                    response = CmdSocketReceive();
+                    while (!response.Contains("200"))
+                        response = CmdSocketReceive();
+                }
+
+                cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("STOR " + RelatePath + "\r\n"));
+                response = CmdSocketReceive();
+                if (!response.Contains("125") && !response.Contains("150"))
+                    throw new Exception("响应错误");
+
+                using (FileStream fs = fileInf.OpenRead())
+                {
+                    int buffLength = 1 * 1024 * 1024;
+                    byte[] buffer = new byte[buffLength];
+                    dataSocket.SendBufferSize = buffLength;
+                    fs.Seek(startbye, 0);
+                    int contentLen = fs.Read(buffer, 0, buffLength);
+                    while (contentLen != 0)
+                    {
+                        dataSocket.Send(buffer, 0, contentLen, SocketFlags.None);
+                        contentLen = fs.Read(buffer, 0, buffLength);
+                        startbye += contentLen;
+                        updateProgress((int)allbye, (int)startbye);
+                    }
+                    updateProgress(1, 1);
+                }
             }
-            dataSocket.Shutdown(SocketShutdown.Send);
-            dataSocket.Disconnect(true);
+            finally
+            {
+                if (dataSocket.Connected)
+                {
+                    dataSocket.Shutdown(SocketShutdown.Send);
+                    dataSocket.Disconnect(true);
+                }
+            }
 
             cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RNFR " + RelatePath + "\r\n"));
             CmdSocketReceive();
-            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RNTO " + RelatePath.Substring(0,RelatePath.Length - 5) + "\r\n"));
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("RNTO " + RelatePath.Substring(0, RelatePath.Length - 5) + "\r\n"));
             CmdSocketReceive();
         }
 
         private long GetFileSize()
         {
-            try
+            cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("SIZE " + RelatePath + "\r\n"));
+            Thread.Sleep(50);
+            string response = CmdSocketReceive();
+            if (response.Contains("213"))
             {
-                cmdSocket.Send(Encoding.GetEncoding("gb2312").GetBytes("SIZE " + RelatePath + "\r\n"));
-                var response = CmdSocketReceive();
-                if (response.StartsWith("213"))
-                    return long.Parse(response.Substring(4, response.Length - 4));
-                return -1;
+                int index = response.LastIndexOf("213");
+                string str = response.Substring(index + 4, response.Length - index - 6);
+                long size = long.Parse(str);
+                return size;
             }
-            catch
-            {
-                return -1;
-            }
-        }
-
-
-        public string GetFileLastModifiedTime()
-        {
-            cmdSocket.Send(Encoding.UTF8.GetBytes("MDTM " + RelatePath + "\r\n"));
-            var response = CmdSocketReceive();
-            if (response.StartsWith("213"))
-            {
-                return response.Substring(4, response.Length - 4); // 去掉响应码
-            }
-            return null;
+            return -1;
         }
 
     }
